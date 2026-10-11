@@ -1,0 +1,49 @@
+name: Build Android APK and AAB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['shoestring-ventures-repo-git/**', '.github/workflows/build-android.yml']
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: shoestring-ventures-repo-git
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Install dependencies
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' }
+        run: npm install
+      - run: npx cap sync android
+      - name: Create signing keystore
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/shoestring.jks" -storetype JKS \
+            -keyalg RSA -keysize 2048 -validity 10000 -alias shoestring \
+            -storepass shoestring-ci -keypass shoestring-ci \
+            -dname "CN=Shoestring Ventures, O=Shoestring Ventures, C=ZA"
+      - name: Build APKs and AAB
+        working-directory: shoestring-ventures-repo-git/android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug assembleRelease bundleRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/shoestring.jks" \
+            -Pandroid.injected.signing.store.password=shoestring-ci \
+            -Pandroid.injected.signing.key.alias=shoestring \
+            -Pandroid.injected.signing.key.password=shoestring-ci
+      - name: Collect files
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/Shoestring-Ventures-debug.apk
+          cp android/app/build/outputs/apk/release/app-release.apk out/Shoestring-Ventures-release.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab out/Shoestring-Ventures.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: shoestring-ventures-repo-git/out/*
