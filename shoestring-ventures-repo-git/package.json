@@ -1,0 +1,48 @@
+{
+  "name": "shoestring-ventures",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shoestring Ventures: a business simulation game.",
+  "main": "app/main.js",
+  "scripts": {
+    "start": "electron .",
+    "cap:sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/ios": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.example.shoestringventures",
+    "productName": "Shoestring Ventures",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

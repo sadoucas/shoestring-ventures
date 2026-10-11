@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shoestring Ventures</title>
+<style>
+/* Layout: a single column that becomes a two-column ledger on wide screens.
+   Palette: warm paper, ink, and a brass accent for money. */
+:root {
+  --bg: #f5f1e8;
+  --panel: #fffdf7;
+  --ink: #1d1b17;
+  --muted: #6d665b;
+  --line: #ddd5c4;
+  --brass: #a8762a;
+  --good: #2e7d4f;
+  --bad: #b23a2e;
+  --warn: #b7791f;
+  --shadow: 0 1px 2px rgba(40,30,10,.06), 0 6px 18px rgba(40,30,10,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17150f;
+    --panel: #221f18;
+    --ink: #f1ead8;
+    --muted: #a39a88;
+    --line: #3b362b;
+    --brass: #d9a54f;
+    --good: #6cc38c;
+    --bad: #ef7b6e;
+    --warn: #f0b960;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17150f;
+  --panel: #221f18;
+  --ink: #f1ead8;
+  --muted: #a39a88;
+  --line: #3b362b;
+  --brass: #d9a54f;
+  --good: #6cc38c;
+  --bad: #ef7b6e;
+  --warn: #f0b960;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  padding-inline: 16px;
+}
+.sans { font-family: "Helvetica Neue", Arial, system-ui, sans-serif; }
+h1, h2, h3 { margin: 0; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: -0.01em; }
+h2 { font-size: 18px; }
+h3 { font-size: 15px; }
+.label {
+  font: 600 11px/1.2 "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.num { font-variant-numeric: tabular-nums; font-family: "Helvetica Neue", Arial, sans-serif; }
+.app { padding-block: 16px 40px; max-width: 1180px; margin-inline: auto; }
+header.top {
+  display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center;
+  justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+.brand { display: grid; gap: 2px; min-width: 0; }
+.hud { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.hud .stat { display: grid; gap: 2px; }
+.hud .stat b { font: 700 18px/1.1 "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.grid { display: grid; gap: 16px; margin-top: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .wide { grid-column: 1 / -1; } }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; box-shadow: var(--shadow); min-width: 0;
+}
+.card > .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--line); align-items: baseline; }
+.row:last-child { border-bottom: 0; }
+.row.total { font-weight: 700; border-top: 1px solid var(--ink); border-bottom: 0; margin-top: 4px; }
+.row .amt { font-family: "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.indent { padding-left: 14px; color: var(--muted); }
+.good { color: var(--good); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+button {
+  font: 600 14px/1 "Helvetica Neue", Arial, sans-serif;
+  background: var(--ink); color: var(--bg); border: 0; border-radius: 8px;
+  padding: 10px 14px; cursor: pointer; min-height: 40px;
+}
+button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+button.brass { background: var(--brass); color: #fff; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+select, input[type=range] { font: 14px "Helvetica Neue", Arial, sans-serif; }
+select {
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; padding: 9px 10px; min-height: 40px; max-width: 100%;
+}
+.industry-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.ind {
+  text-align: left; background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px; cursor: pointer; display: grid; gap: 6px; min-height: 0;
+  font-weight: 400; box-shadow: var(--shadow);
+}
+.ind:hover, .ind[aria-pressed="true"] { border-color: var(--brass); }
+.ind[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--brass); }
+.ind .name { font: 700 16px/1.2 "Helvetica Neue", Arial, sans-serif; }
+.ind p { margin: 0; font-size: 13px; color: var(--muted); }
+.ind .meta { font: 12px/1.4 "Helvetica Neue", Arial, sans-serif; color: var(--muted); }
+.tag { display: inline-block; font: 600 11px/1 "Helvetica Neue", Arial, sans-serif; padding: 4px 7px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.tag.brass { border-color: var(--brass); color: var(--brass); }
+.staff-row { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.staff-row:last-child { border-bottom: 0; }
+.staff-row small { color: var(--muted); font: 12px/1.4 "Helvetica Neue", Arial, sans-serif; }
+.stepper { display: inline-flex; align-items: center; gap: 6px; }
+.stepper button { min-width: 36px; min-height: 36px; padding: 0 10px; }
+.stepper span { min-width: 28px; text-align: center; font-family: "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.contract {
+  border: 1px solid var(--brass); border-radius: 10px; padding: 14px; display: grid; gap: 10px;
+  background: color-mix(in srgb, var(--brass) 8%, var(--panel));
+}
+.contract p { margin: 0; font-size: 14px; color: var(--muted); }
+.lesson {
+  border-left: 3px solid var(--brass); padding: 8px 12px; margin: 10px 0 0;
+  font-size: 14px; background: color-mix(in srgb, var(--brass) 7%, transparent); border-radius: 0 8px 8px 0;
+}
+.lesson b { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--brass); }
+.log { max-height: 260px; overflow-y: auto; font-size: 14px; display: grid; gap: 6px; padding-right: 4px; }
+.log div { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.log div:last-child { border-bottom: 0; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--brass); }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.spacer { height: 10px; }
+.tooltip-term { border-bottom: 1px dotted var(--muted); cursor: help; }
+.overlay {
+  position: fixed; inset: 0; background: rgba(10,8,4,.55); display: grid; place-items: center; padding: 16px; z-index: 10;
+}
+.modal {
+  background: var(--panel); color: var(--ink); border-radius: 12px; border: 1px solid var(--line);
+  padding: 22px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; display: grid; gap: 12px;
+  box-shadow: var(--shadow);
+}
+.modal p { margin: 0; }
+.statement-wrap { overflow-x: auto; }
+.chart { width: 100%; height: 150px; display: block; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<style>
+.speedbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.speedbar button[aria-pressed="true"] { background: var(--brass); color: #fff; }
+.live { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-top: 12px; }
+.tile { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+.tile b { display: block; font: 700 22px/1.1 "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.feed { max-height: 300px; overflow-y: auto; display: grid; gap: 6px; font-size: 14px; }
+.feed > div { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.feed > div:last-child { border-bottom: 0; }
+.hist { width: 100%; border-collapse: collapse; font-size: 14px; }
+.hist th, .hist td { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); }
+.hist th { font: 600 11px/1.2 "Helvetica Neue", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.hist td.num { text-align: right; }
+.tierbar { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+</style>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="label">A business simulation · 5 years</span>
+      <h1 id="title">Shoestring Ventures</h1>
+      <span id="dateLabel" class="small muted"></span>
+    </div>
+    <div id="hudWrap" class="hud" style="display:none"></div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup">
+    <div class="card wide" style="margin-top:16px">
+      <div class="head"><h2>Choose your business</h2><span class="label">Step 1 of 2</span></div>
+      <p class="muted small">Every industry runs on the same rules: customers, sales, costs, payroll, cash, and tax. The differences are in margins, risk, and the contracts on offer.</p>
+      <div class="spacer"></div>
+      <div id="indGrid" class="industry-grid"></div>
+    </div>
+    <div class="card wide" style="margin-top:16px">
+      <div class="head"><h2>Rent your first premises</h2><span class="label">Step 2 of 2</span></div>
+      <p class="muted small">Location decides how many customers find you and how much you can serve. A bigger site costs more every month and needs a deposit.</p>
+      <div class="spacer"></div>
+      <div id="tierGrid" class="tierbar"></div>
+      <div class="spacer"></div>
+      <p id="risk" class="small muted"></p>
+      <div class="btns" style="margin-top:12px"><button id="startBtn" class="brass" disabled>Open the doors</button></div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="hidden">
+    <div class="card wide" style="margin-top:16px">
+      <div class="head">
+        <div class="speedbar" role="group" aria-label="Simulation speed">
+          <button class="ghost" data-speed="0" aria-pressed="true">Pause</button>
+          <button class="ghost" data-speed="2" aria-pressed="false">▶ Slow</button>
+          <button class="ghost" data-speed="6" aria-pressed="false">▶▶ Fast</button>
+          <button class="ghost" data-speed="15" aria-pressed="false">▶▶▶ Turbo</button>
+          <button id="skipBtn" class="brass">Skip to month end</button>
+        </div>
+        <button id="restartBtn" class="ghost">Restart</button>
+      </div>
+      <div class="hud">
+        <div class="stat"><span class="label">Cash</span><b id="hudCash" class="num"></b></div>
+        <div class="stat"><span class="label">Net worth</span><b id="hudNW" class="num"></b></div>
+        <div class="stat"><span class="label">Reputation</span><b id="hudRep" class="num"></b></div>
+        <div class="stat"><span class="label">Staff</span><b id="hudStaff" class="num"></b></div>
+        <div class="stat"><span class="label">Capacity</span><b id="hudCap" class="num"></b></div>
+        <div class="stat"><span class="label">Premises</span><b id="hudPrem" style="font-size:14px"></b></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Today -->
+      <div class="card wide">
+        <div class="head"><h2>Today at the business</h2><span id="todayDate" class="label"></span></div>
+        <div class="live">
+          <div class="tile"><span class="label" id="visLabel">Visitors</span><b id="todayVis">0</b></div>
+          <div class="tile"><span class="label">Sales</span><b id="todayBuy">0</b></div>
+          <div class="tile"><span class="label">Turned away</span><b id="todayWalk">0</b></div>
+          <div class="tile"><span class="label">Conversion</span><b id="todayConv">—</b></div>
+          <div class="tile"><span class="label">Revenue today</span><b id="todaySales">$0</b></div>
+          <div class="tile"><span class="label">Cash now</span><b id="todayCash">$0</b></div>
+        </div>
+        <p id="todayNote" class="small bad"></p>
+        <div class="spacer"></div>
+        <div class="head"><h3>Last 30 days: visitors (grey) and sales (gold)</h3><span class="small muted">Month to date: <span id="mtdVis">0</span> visitors, <span id="mtdBuy">0</span> sales</span></div>
+        <svg id="dayChart" class="chart" role="img" aria-label="Visitors and sales over the last 30 days" style="height:150px"></svg>
+      </div>
+
+      <!-- Business log -->
+      <div class="card">
+        <div class="head"><h2>Business log</h2><span class="label">Latest first</span></div>
+        <div id="feed" class="feed"></div>
+      </div>
+
+      <!-- Operations -->
+      <div class="card">
+        <div class="head"><h2>Operations</h2></div>
+        <label class="label" for="priceTier">Pricing</label>
+        <div class="spacer" style="height:6px"></div>
+        <select id="priceTier" style="width:100%">
+          <option value="0">Discount (more sales, less per sale)</option>
+          <option value="1">Standard</option>
+          <option value="2">Premium (fewer sales, more per sale)</option>
+        </select>
+        <p id="priceNote" class="small muted"></p>
+        <div class="spacer"></div>
+        <label class="label" for="mkt">Monthly marketing</label>
+        <div class="spacer" style="height:6px"></div>
+        <select id="mkt" style="width:100%">
+          <option value="0">None</option>
+          <option value="1000">$1,000</option>
+          <option value="2500">$2,500</option>
+          <option value="5000">$5,000</option>
+          <option value="10000">$10,000</option>
+        </select>
+        <p id="mktNote" class="small muted"></p>
+        <div class="spacer"></div>
+        <h3>Staff</h3>
+        <div id="staffList"></div>
+        <div class="spacer"></div>
+        <h3>Equipment</h3>
+        <p id="upgradeNote" class="small muted"></p>
+        <div class="btns" style="margin-top:6px"><button id="upgradeBtn" class="ghost">Buy upgrade</button></div>
+      </div>
+
+      <!-- Premises -->
+      <div class="card">
+        <div class="head"><h2>Premises</h2></div>
+        <p id="premNow" class="small"></p>
+        <div class="spacer"></div>
+        <div id="premOptions"></div>
+        <p id="premNote" class="small muted"></p>
+      </div>
+
+      <!-- Contracts -->
+      <div class="card wide">
+        <div class="head"><h2>Contracts</h2><span id="contractCount" class="label"></span></div>
+        <p id="contractNote" class="small muted"></p>
+        <div class="spacer"></div>
+        <div id="offers" class="grid" style="margin-top:0"></div>
+        <div class="spacer"></div>
+        <h3>Active contracts</h3>
+        <div id="active"></div>
+      </div>
+
+      <!-- Income statement -->
+      <div class="card wide">
+        <div class="head">
+          <h2>Income statement</h2>
+          <div class="btns">
+            <button id="stmtMtd" class="ghost" aria-pressed="true">This month</button>
+            <button id="stmtLast" class="ghost" aria-pressed="false">Last closed month</button>
+          </div>
+        </div>
+        <div id="statement" class="statement-wrap"></div>
+        <p id="verdict" class="small"></p>
+      </div>
+
+      <!-- Balance -->
+      <div class="card">
+        <div class="head"><h2>Balance sheet</h2></div>
+        <div id="balance"></div>
+        <div class="spacer"></div>
+        <h3>Borrowing</h3>
+        <p id="loanInfo" class="small muted"></p>
+        <div class="btns" style="margin-top:6px">
+          <button id="borrowBtn" class="ghost">Borrow $25,000</button>
+          <button id="repayBtn" class="ghost">Repay $25,000</button>
+        </div>
+      </div>
+
+      <!-- Net worth and history -->
+      <div class="card">
+        <div class="head"><h2>Net worth</h2><span id="chartNote" class="small muted"></span></div>
+        <svg id="chart" class="chart" role="img" aria-label="Net worth over time"></svg>
+      </div>
+      <div class="card wide">
+        <div class="head"><h2>Monthly results</h2></div>
+        <div id="history"></div>
+      </div>
+    </div>
+
+    <p class="small muted" style="margin-top:24px">Simplified for learning. Real businesses have many more variables, and this game is not financial advice.</p>
+  </section>
+</div>
+
+<div id="modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalBody">
+  <div id="modalBody" class="modal"></div>
+</div>
+<div id="toast" class="card hidden" role="status" style="position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;z-index:20;box-shadow:var(--shadow)"></div>
+<script>
+const INDUSTRIES = [
+  {
+    id: "cafe", name: "Neighbourhood Café", icon: "☕",
+    blurb: "Coffee, pastries and lunch. Low margins, high foot traffic, and rent that never sleeps.",
+    startCash: 60000, equipCost: 25000, rent: 3200, utilities: 700, insurance: 250,
+    price: 7.5, unitCost: 2.1, baseDemand: 2600, seasonAmp: 0.18, season: [0.85,0.9,1,1,1.05,1.05,0.95,0.9,1.05,1.1,1.1,1.2],
+    capPerStaff: 900, equipCapBoost: 0.25, reputationStart: 1,
+    roles: [
+      { id: "barista", name: "Barista", salary: 2900, cap: 1 },
+      { id: "cook", name: "Cook", salary: 3300, cap: 0.6 },
+      { id: "manager", name: "Shift manager", salary: 4200, cap: 0.4 }
+    ],
+    contracts: [
+      { name: "Office catering account", monthly: 3800, months: 12, deposit: 4000, staffNeeded: 2, penalty: 1500, desc: "A tech company wants daily breakfast boxes for its 120 staff." },
+      { name: "Wedding season banquet", monthly: 9000, months: 1, deposit: 3000, staffNeeded: 3, penalty: 2500, desc: "A hotel asks you to cater a three-day wedding for 400 guests." }
+    ],
+    risk: "Food spoilage and tight margins punish waste."
+  },
+  {
+    id: "saas", name: "Software Startup", icon: "💻",
+    blurb: "Build a product, sell subscriptions, and watch the burn rate. High margins once it works.",
+    startCash: 150000, equipCost: 30000, rent: 2000, utilities: 300, insurance: 400,
+    price: 49, unitCost: 6, baseDemand: 900, seasonAmp: 0.05, season: [1,1,1.05,1,1,0.95,0.9,0.95,1.05,1.05,1,0.95],
+    capPerStaff: 300, equipCapBoost: 0.2, reputationStart: 1,
+    roles: [
+      { id: "dev", name: "Engineer", salary: 9500, cap: 1 },
+      { id: "sales", name: "Sales rep", salary: 6500, cap: 0.5 },
+      { id: "support", name: "Support agent", salary: 4000, cap: 0.6 }
+    ],
+    contracts: [
+      { name: "Enterprise licence", monthly: 12000, months: 24, deposit: 0, staffNeeded: 3, penalty: 8000, desc: "A bank will pay $12k a month if you guarantee 99.9% uptime and a security audit." },
+      { name: "Government pilot", monthly: 6000, months: 6, deposit: 10000, staffNeeded: 2, penalty: 4000, desc: "A city council pilot. Slow to pay, but a famous name on your website." }
+    ],
+    risk: "Hiring ahead of revenue is the classic startup killer."
+  },
+  {
+    id: "construction", name: "Construction Crew", icon: "🏗️",
+    blurb: "Big jobs, big deposits, and materials that rise in price when you least expect it.",
+    startCash: 120000, equipCost: 70000, rent: 1500, utilities: 400, insurance: 1600,
+    price: 22000, unitCost: 13500, baseDemand: 2.5, seasonAmp: 0.1, season: [0.5,0.5,0.7,0.9,1.1,1.2,1.2,1.2,1.1,1,0.8,0.6],
+    capPerStaff: 2, equipCapBoost: 0.3, reputationStart: 1,
+    roles: [
+      { id: "labourer", name: "Labourer", salary: 3600, cap: 1 },
+      { id: "carpenter", name: "Carpenter", salary: 5200, cap: 1 },
+      { id: "foreman", name: "Foreman", salary: 6800, cap: 0.5 }
+    ],
+    contracts: [
+      { name: "Office block renovation", monthly: 42000, months: 6, deposit: 30000, staffNeeded: 5, penalty: 20000, desc: "A landlord wants a full fit-out in six months. The deposit covers materials." },
+      { name: "School extension", monthly: 28000, months: 4, deposit: 15000, staffNeeded: 4, penalty: 15000, desc: "A council contract. Fixed price, strict inspections, delays cost you." }
+    ],
+    risk: "Fixed-price jobs lose money when materials spike."
+  },
+  {
+    id: "clinic", name: "Dental Clinic", icon: "🦷",
+    blurb: "Steady patient flow, expensive equipment, insurance paperwork, and a waiting room that never empties.",
+    startCash: 180000, equipCost: 90000, rent: 3800, utilities: 900, insurance: 1200,
+    price: 150, unitCost: 45, baseDemand: 130, seasonAmp: 0.08, season: [1,1,1.05,1,1,0.9,0.85,0.9,1.05,1.05,1,0.95],
+    capPerStaff: 60, equipCapBoost: 0.2, reputationStart: 1,
+    roles: [
+      { id: "dentist", name: "Dentist", salary: 9500, cap: 1 },
+      { id: "hygienist", name: "Hygienist", salary: 6500, cap: 1 },
+      { id: "reception", name: "Receptionist", salary: 3200, cap: 0.5 }
+    ],
+    contracts: [
+      { name: "Corporate health plan", monthly: 15000, months: 12, deposit: 5000, staffNeeded: 2, penalty: 6000, desc: "A 900-person employer wants a fixed monthly rate for check-ups." },
+      { name: "Care-home partnership", monthly: 8000, months: 12, deposit: 0, staffNeeded: 1, penalty: 3000, desc: "Regular visits to a care home. Lower pay, very low demand risk." }
+    ],
+    risk: "Slow-paying insurers can starve cash flow."
+  },
+  {
+    id: "freight", name: "Freight Trucking", icon: "🚚",
+    blurb: "Move other people's goods across the country. Fuel prices and the weather decide your year.",
+    startCash: 130000, equipCost: 110000, rent: 900, utilities: 200, insurance: 2400,
+    price: 3800, unitCost: 1900, baseDemand: 14, seasonAmp: 0.05, season: [0.9,0.85,0.95,1,1.05,1.05,1.05,1.1,1.05,1.1,1.15,1.05],
+    capPerStaff: 4, equipCapBoost: 0.5, reputationStart: 1,
+    roles: [
+      { id: "driver", name: "Driver", salary: 5200, cap: 1 },
+      { id: "dispatch", name: "Dispatcher", salary: 4300, cap: 0.5 },
+      { id: "mechanic", name: "Mechanic", salary: 5600, cap: 0.3 }
+    ],
+    contracts: [
+      { name: "Retail chain distribution", monthly: 26000, months: 18, deposit: 10000, staffNeeded: 4, penalty: 12000, desc: "A supermarket chain needs 40 deliveries a week. Late deliveries cost you." },
+      { name: "One-off furniture haul", monthly: 9000, months: 1, deposit: 4000, staffNeeded: 2, penalty: 2000, desc: "A one-time cross-country move for a corporate relocation." }
+    ],
+    risk: "Fuel and maintenance costs swing wildly."
+  },
+  {
+    id: "boutique", name: "Clothing Boutique", icon: "👗",
+    blurb: "Fashion, fitting rooms and seasonal stock. Good taste is cheap. Good inventory is not.",
+    startCash: 75000, equipCost: 15000, rent: 4200, utilities: 500, insurance: 300,
+    price: 58, unitCost: 26, baseDemand: 230, seasonAmp: 0.3, season: [0.7,0.75,0.9,1,1,0.8,0.7,0.85,1,1.1,1.45,1.6],
+    capPerStaff: 280, equipCapBoost: 0.15, reputationStart: 1,
+    roles: [
+      { id: "assistant", name: "Sales assistant", salary: 2800, cap: 1 },
+      { id: "buyer", name: "Buyer", salary: 4600, cap: 0.4 }
+    ],
+    contracts: [
+      { name: "Hotel uniform order", monthly: 7000, months: 3, deposit: 2000, staffNeeded: 1, penalty: 1500, desc: "A hotel group wants 600 uniforms, delivered in three monthly batches." },
+      { name: "Celebrity collab", monthly: 11000, months: 2, deposit: 5000, staffNeeded: 2, penalty: 4000, desc: "A famous name wants a capsule collection. Huge exposure, tight deadline." }
+    ],
+    risk: "Unsold stock is cash you cannot spend."
+  },
+  {
+    id: "farm", name: "Organic Farm", icon: "🌾",
+    blurb: "Land, seasons and patience. Weather is the biggest expense you cannot budget for.",
+    startCash: 100000, equipCost: 60000, rent: 800, utilities: 350, insurance: 900,
+    price: 2200, unitCost: 800, baseDemand: 9, seasonAmp: 0.1, season: [0.2,0.2,0.4,0.9,1.4,1.5,1.4,1.2,1.1,0.8,0.5,0.3],
+    capPerStaff: 3, equipCapBoost: 0.3, reputationStart: 1,
+    roles: [
+      { id: "worker", name: "Field worker", salary: 3000, cap: 1 },
+      { id: "agronomist", name: "Agronomist", salary: 5200, cap: 0.3 }
+    ],
+    contracts: [
+      { name: "Supermarket produce deal", monthly: 14000, months: 12, deposit: 0, staffNeeded: 3, penalty: 9000, desc: "Weekly boxes of organic vegetables for a regional chain." },
+      { name: "Restaurant group supply", monthly: 6500, months: 6, deposit: 3000, staffNeeded: 2, penalty: 3000, desc: "Five restaurants want a fixed weekly order of herbs and greens." }
+    ],
+    risk: "A bad harvest hits revenue for a full year."
+  }
+];
+
+/* ---------- Random events. Each one teaches a concept. ---------- */
+const EVENTS = [
+  { id: "breakdown", p: 0.05, title: "Equipment breaks down", text: "The main machine needs a $4,200 repair.", apply: s => { s.cash -= 4200; s.expenseRepairs += 4200; }, lesson: "Repairs are an operating expense. Keep a reserve, because breakdowns never ask when you can afford them." },
+  { id: "supplier", p: 0.06, title: "Supplier raises prices", text: "Your main supplier raises unit costs by 12% for the next 6 months.", apply: s => { s.supplierUp = 6; }, lesson: "Input cost inflation squeezes gross margin even when sales are healthy." },
+  { id: "viral", p: 0.04, title: "Good review goes viral", text: "A local influencer loves you. Reputation jumps.", apply: s => { s.reputation = Math.min(1.5, s.reputation + 0.15); }, lesson: "Reputation is an asset. It compounds, but it takes years to build and one bad month to lose." },
+  { id: "recession", p: 0.04, title: "Economic slowdown", text: "Customers cut back. Demand falls 15% for 4 months.", apply: s => { s.recession = 4; }, lesson: "Recessions are normal. Businesses that survive them usually had cash in the bank before the downturn." },
+  { id: "audit", p: 0.03, title: "Tax audit", text: "The tax office reviews your books. Records are in order, so the fine is only $1,500.", apply: s => { s.cash -= 1500; s.expenseOther += 1500; }, lesson: "Good bookkeeping makes audits cheap. Keep receipts and reconcile every month." },
+  { id: "grant", p: 0.03, title: "Small business grant", text: "A local council grant pays $8,000. It is not a loan, so you keep it.", apply: s => { s.cash += 8000; s.otherIncome += 8000; }, lesson: "Grants are non-dilutive funding. They are rare, so do not build the budget on them." },
+  { id: "theft", p: 0.02, title: "Stock theft", text: "Inventory shrinkage costs $2,800 this month.", apply: s => { s.cash -= 2800; s.expenseOther += 2800; }, lesson: "Shrinkage is a real cost. Controls, not optimism, protect margin." },
+  { id: "hire_poach", p: 0.03, title: "Key employee poached", text: "A competitor offers your best staff member a higher wage. You lose one unit of capacity for 2 months.", apply: s => { s.poached = 2; }, lesson: "Turnover is expensive. Paying slightly better than the market is often cheaper than replacing people." }
+];
+
+
+/* ---------- Per-industry extras: how customers behave and where the business can rent ---------- */
+const EXTRA = {
+  cafe:         { visitor: "Customers in store", weekend: 1.35, conv: 0.5,  prem: ["Back-street unit", "High-street café", "Mall food court"] },
+  boutique:     { visitor: "Shoppers in store",  weekend: 1.3,  conv: 0.3,  prem: ["Side-street boutique", "Main-road store", "Designer flagship"] },
+  saas:         { visitor: "Trial sign-ups",     weekend: 0.6,  conv: 0.25, prem: ["Shared co-working desks", "Own office floor", "Campus headquarters"] },
+  clinic:       { visitor: "Patients booked",    weekend: 0.3,  conv: 0.9,  prem: ["Medical suite", "Shopping-centre clinic", "Flagship practice"] },
+  construction: { visitor: "Enquiries",          weekend: 0.6,  conv: 0.9,  prem: ["Rented yard", "Workshop and yard", "Depot complex"] },
+  freight:      { visitor: "Booking requests",   weekend: 0.7,  conv: 0.85, prem: ["Small depot", "Regional hub", "National terminal"] },
+  farm:         { visitor: "Orders received",    weekend: 0.8,  conv: 0.8,  prem: ["Rented acreage", "Leased farmland", "Estate farm"] }
+};
+const TIERS = [
+  { id: "budget",   label: "Budget",   rentMult: 0.7,  capMult: 0.8,  footMult: 0.8,  depMonths: 2, moveCost: 4000 },
+  { id: "standard", label: "Standard", rentMult: 1.0,  capMult: 1.0,  footMult: 1.0,  depMonths: 2, moveCost: 6000 },
+  { id: "prime",    label: "Prime",    rentMult: 1.9,  capMult: 1.25, footMult: 1.45, depMonths: 3, moveCost: 12000 }
+];
+const CLIENTS = ["Harbour Group", "Northgate Ltd", "Summit Partners", "Bluebird Holdings", "Oakridge Council", "Redline Logistics", "Maple & Co", "Cobalt Retail", "Riverside Trust", "Ironbridge plc"];
+for (const ind of INDUSTRIES) Object.assign(ind, EXTRA[ind.id]);
+
+/* ---------- Simulation engine: runs one day at a time. A month is 30 days. ---------- */
+const DAYS = 30, MONTH_LIMIT = 60, MAX_CONTRACTS = 4;
+const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let S = null;
+
+const fmt = n => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-US");
+const pct = n => (n * 100).toFixed(1) + "%";
+const rnd = (a, b) => a + Math.random() * (b - a);
+function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random()); }
+function poisson(l) {
+  if (l <= 0) return 0;
+  if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * gauss()));
+  const L = Math.exp(-l); let k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
+/* ----- calendar ----- */
+function dim(s) { return (s.day % DAYS) + 1; }            // day of month, 1..30
+function monthIdx(s) { return Math.floor(s.day / DAYS); }  // months elapsed
+function dateLabel(s) {
+  const m = monthIdx(s);
+  return DOW[s.day % 7] + " · " + MONTH_NAMES[m % 12] + " · day " + dim(s) + " · Year " + (Math.floor(m / 12) + 1);
+}
+
+/* ----- setup ----- */
+function emptyMonth() {
+  return { visitors: 0, buyers: 0, walkouts: 0, sales: 0, cogs: 0, contract: 0, payroll: 0, payTax: 0,
+    rent: 0, util: 0, ins: 0, mkt: 0, pen: 0, dep: 0, int: 0, evExp: 0, evInc: 0, shortDays: 0 };
+}
+function newGame(ind, tierId) {
+  const tier = TIERS.find(t => t.id === tierId) || TIERS[1];
+  const deposit = ind.rent * tier.rentMult * tier.depMonths;
+  return {
+    ind, tier, deposit, day: 0,
+    cash: ind.startCash - ind.equipCost - deposit,
+    equipGross: ind.equipCost, equipAccDep: 0, loan: 0, overdraftNeg: 0,
+    reputation: ind.reputationStart,
+    staff: Object.fromEntries(ind.roles.map(r => [r.id, 1])),
+    priceTier: 1, marketing: 0, equipLevel: 0,
+    contracts: [], offers: [], capBank: 0,
+    supplierUp: 0, recession: 0, poached: 0,
+    M: emptyMonth(), months: [], dayLog: [], netWorthHistory: [],
+    pending: [], today: null, closed: null, over: false, outcome: ""
+  };
+}
+
+/* ----- derived numbers ----- */
+const rentOf = s => s.ind.rent * s.tier.rentMult;
+const staffUnits = s => s.ind.roles.reduce((t, r) => t + s.staff[r.id] * r.cap, 0);
+const payrollMonthly = s => s.ind.roles.reduce((t, r) => t + s.staff[r.id] * r.salary, 0);
+const priceFor = s => s.ind.price * [0.85, 1, 1.18][s.priceTier];
+const mktMult = s => 1 + 0.45 * (1 - Math.exp(-s.marketing / 4000));
+const repMult = s => Math.min(1.4, Math.max(0.5, s.reputation));
+function capacityMonthly(s) {
+  let c = staffUnits(s) * s.ind.capPerStaff * (1 + s.ind.equipCapBoost * s.equipLevel) * s.tier.capMult;
+  if (s.poached > 0) c -= s.ind.capPerStaff * 0.5;
+  return Math.max(0, c);
+}
+/* Average buyers expected per day, shaped by season, weekday, price, marketing, reputation and premises. */
+function buyerDemandDaily(s, dow) {
+  const ind = s.ind, w = ind.weekend, wd = 7 / (5 + 2 * w);
+  const dowF = dow >= 5 ? w * wd : wd;
+  const elastic = [1.25, 1, 0.82][s.priceTier];
+  return ind.baseDemand / DAYS * ind.season[monthIdx(s) % 12] * dowF * mktMult(s) * elastic
+    * repMult(s) * s.tier.footMult * (s.recession > 0 ? 0.85 : 1);
+}
+function netWorthNow(s) { return s.cash + (s.equipGross - s.equipAccDep) + s.deposit - s.loan; }
+
+/* ----- offers ----- */
+function makeOffer(s) {
+  const t = s.ind.contracts[Math.floor(Math.random() * s.ind.contracts.length)];
+  const f = rnd(0.85, 1.25);
+  return {
+    name: t.name, client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
+    monthly: Math.round(t.monthly * f / 100) * 100, months: t.months,
+    deposit: Math.round(t.deposit * f / 100) * 100, staffNeeded: t.staffNeeded,
+    penalty: Math.round(t.penalty * f / 100) * 100, desc: t.desc, expires: s.day + 20
+  };
+}
+function acceptOffer(s, i) {
+  const o = s.offers[i];
+  if (!o) return "none";
+  if (s.contracts.length >= MAX_CONTRACTS) return "limit";
+  s.contracts.push({ ...o, monthsLeft: o.months });
+  s.cash += o.deposit;
+  s.offers.splice(i, 1);
+  return "ok";
+}
+function declineOffer(s, i) { s.offers.splice(i, 1); }
+
+/* ----- premises ----- */
+function movePremises(s, tierId) {
+  const t = TIERS.find(x => x.id === tierId);
+  if (!t || t.id === s.tier.id) return "same";
+  const newDep = s.ind.rent * t.rentMult * t.depMonths;
+  const need = t.moveCost + newDep - s.deposit;        // old deposit comes back
+  if (s.cash < need + 1000) return "cash";
+  s.cash -= need;
+  s.M.evExp += t.moveCost;
+  s.deposit = newDep;
+  s.tier = t;
+  s.pending.push({ day: s.day, title: "Moved premises", text: "You moved to " + s.ind.prem[TIERS.indexOf(t)] + ". Rent is now " + fmt(rentOf(s)) + " a month.", lesson: "A location changes rent, the number of customers and how much space you can serve. Prime sites cost more but usually sell more." });
+  return "ok";
+}
+
+/* ----- one day ----- */
+function stepDay(s) {
+  const ind = s.ind, d = dim(s), dow = s.day % 7, M = s.M;
+  const events = [];
+
+  // 1. Costs that are due on fixed dates
+  if (d === 1) { const r = rentOf(s), ins = ind.insurance; s.cash -= r + ins; M.rent += r; M.ins += ins; }
+  if (d === 28) { const p = payrollMonthly(s), tax = p * 0.09; s.cash -= p + tax; M.payroll += p; M.payTax += tax; }
+
+  // 2. Random events (monthly chance spread over days)
+  for (const e of EVENTS) {
+    if (Math.random() < e.p / DAYS) {
+      const before = s.cash;
+      e.apply(s);
+      const delta = s.cash - before;
+      if (delta < 0) M.evExp -= delta; else if (delta > 0) M.evInc += delta;
+      events.push(e.title);
+      s.pending.push({ day: s.day, title: e.title, text: e.text, lesson: e.lesson });
+    }
+  }
+
+  // 3. Customers: some want to buy, some browse, some walk out when there is no capacity
+  const potential = poisson(buyerDemandDaily(s, dow));
+  s.capBank = Math.min(s.capBank + capacityMonthly(s) / DAYS, capacityMonthly(s));
+  const buyers = Math.min(potential, Math.floor(s.capBank));
+  s.capBank -= buyers;
+  const lost = potential - buyers;
+  const walkouts = Math.round(lost / ind.conv);
+  const visitors = Math.round(buyers / ind.conv) + walkouts;
+
+  // 4. Sales and product cost
+  const sales = buyers * priceFor(s);
+  const cogs = buyers * ind.unitCost * (s.supplierUp > 0 ? 1.12 : 1);
+  s.cash += sales - cogs;
+  M.buyers += buyers; M.visitors += visitors; M.walkouts += walkouts; M.sales += sales; M.cogs += cogs;
+
+  // 5. Contracts: money arrives daily, staffing is checked daily
+  const need = s.contracts.reduce((t, c) => t + c.staffNeeded, 0);
+  const short = need > 0 && staffUnits(s) < need * 0.8;
+  if (short) M.shortDays++;
+  let contractDay = 0;
+  for (const c of s.contracts) contractDay += c.monthly / DAYS;
+  s.cash += contractDay; M.contract += contractDay;
+
+  // 6. Running costs and non-cash items
+  const util = ind.utilities / DAYS, mkt = s.marketing / DAYS;
+  s.cash -= util + mkt; M.util += util; M.mkt += mkt;
+  const dep = Math.min(s.equipGross / 36, s.equipGross - s.equipAccDep);
+  s.equipAccDep += dep; M.dep += dep;
+  const intDay = s.loan * 0.09 / 365 + (s.cash < 0 ? -s.cash * 0.22 / 365 : 0);
+  s.cash -= intDay; M.int += intDay;
+
+  // 7. Record the day
+  const rec = { day: s.day, label: dateLabel(s), visitors, buyers, walkouts, sales, cogs,
+    contract: contractDay, cashEnd: s.cash, events, short, potential };
+  s.today = rec;
+  s.dayLog.push(rec);
+  if (s.dayLog.length > 120) s.dayLog.shift();
+
+  s.day++;
+
+  // 8. New offers arrive, old ones expire
+  if (s.offers.length < 3 && Math.random() < 0.12) s.offers.push(makeOffer(s));
+  s.offers = s.offers.filter(o => o.expires > s.day);
+
+  if (s.day % DAYS === 0) closeMonth(s);
+  return rec;
+}
+
+/* ----- statement and month end ----- */
+function statementFrom(s, M) {
+  const rev = M.sales + M.contract;
+  const gp = rev - M.cogs;
+  const opex = M.payroll + M.payTax + M.rent + M.util + M.ins + M.mkt + M.pen + M.evExp;
+  const ebitda = gp - opex + M.evInc;
+  const ebit = ebitda - M.dep;
+  const ebt = ebit - M.int;
+  return { sales: M.sales, contract: M.contract, rev, cogs: M.cogs, gp,
+    payroll: M.payroll, payTax: M.payTax, rent: M.rent, util: M.util, ins: M.ins, mkt: M.mkt,
+    pen: M.pen, evExp: M.evExp, evInc: M.evInc, ebitda, dep: M.dep, ebit, int: M.int, ebt,
+    tax: 0, net: ebt, visitors: M.visitors, buyers: M.buyers, walkouts: M.walkouts, shortDays: M.shortDays };
+}
+function closeMonth(s) {
+  const M = s.M;
+  const n = s.months.length;
+  const label = MONTH_NAMES[n % 12] + " Y" + (Math.floor(n / 12) + 1);
+  if (s.contracts.length && M.shortDays >= 8) {
+    const p = s.contracts.reduce((t, c) => t + c.penalty, 0);
+    s.cash -= p; M.pen += p;
+    s.reputation = Math.max(0.5, s.reputation - 0.05 * s.contracts.length);
+    s.pending.push({ day: s.day, title: "Contract shortfall", text: "You were under-staffed on " + M.shortDays + " days. Penalties of " + fmt(p) + " are due.", lesson: "Never sign work you cannot staff. Penalties land in cash that is already committed to payroll." });
+  } else if (s.contracts.length) {
+    s.reputation = Math.min(1.5, s.reputation + 0.02);
+  }
+  const L = statementFrom(s, M);
+  L.tax = L.ebt > 0 ? L.ebt * 0.25 : 0;
+  s.cash -= L.tax;
+  L.net = L.ebt - L.tax;
+  L.label = label;
+  L.lessons = buildLessons(L, s);
+  s.months.push(L);
+  s.closed = L;
+  for (const c of s.contracts) c.monthsLeft--;
+  s.contracts = s.contracts.filter(c => c.monthsLeft > 0);
+  if (s.supplierUp > 0) s.supplierUp--;
+  if (s.recession > 0) s.recession--;
+  if (s.poached > 0) s.poached--;
+  if (s.cash < 0) s.overdraftNeg++; else s.overdraftNeg = 0;
+  s.netWorthHistory.push(netWorthNow(s));
+  s.M = emptyMonth();
+  if (s.overdraftNeg >= 3) { s.over = true; s.outcome = "bankrupt"; }
+  if (s.months.length >= MONTH_LIMIT) { s.over = true; s.outcome = s.outcome || "finished"; }
+}
+/* Skip forward through one full month (or until the game ends). Returns the day records. */
+function skipToMonthEnd(s) {
+  const out = [];
+  do { out.push(stepDay(s)); } while (!s.over && s.day % DAYS !== 0);
+  return out;
+}
+
+function buildLessons(L, s) {
+  const out = [];
+  if (L.rev > 0) {
+    const gm = L.gp / L.rev;
+    if (gm < 0.35) out.push({ t: "Gross margin", x: "Gross margin is " + pct(gm) + ". Only " + fmt(L.gp) + " is left after cost of goods to pay for everything else. Raise prices or cut unit costs." });
+    else if (gm > 0.6) out.push({ t: "Gross margin", x: "Gross margin is " + pct(gm) + ". Strong margins absorb shocks better." });
+    const pr = (L.payroll + L.payTax) / L.rev;
+    if (pr > 0.55) out.push({ t: "Payroll ratio", x: "Payroll is " + pct(pr) + " of revenue. Above about 55% most businesses struggle. Hire against demand, not hope." });
+  }
+  if (L.walkouts > 0) out.push({ t: "Lost customers", x: L.walkouts + " customers walked out because capacity ran out. Hiring too little costs sales just as hiring too much costs cash." });
+  if (L.mkt > 0 && L.buyers > 0) out.push({ t: "Marketing return", x: "You spent " + fmt(L.mkt) + " on marketing. Ask whether it returned more gross profit than it cost." });
+  if (L.net > 0 && s.cash < 0) out.push({ t: "Profit is not cash", x: "The income statement shows profit but the bank is overdrawn. Profit is accounting; cash is survival." });
+  if (L.net < 0) out.push({ t: "Burn rate", x: "You lost " + fmt(-L.net) + " this month. Work out how many months your cash lasts at this pace." });
+  if (L.net > 0) out.push({ t: "Profit", x: "You made " + fmt(L.net) + " after tax. Profit you keep is how a business grows without borrowing." });
+  if (s.loan > 0) out.push({ t: "Debt", x: "Interest cost " + fmt(L.int) + " this month. Debt pays off only when the return beats the rate." });
+  if (!out.length) out.push({ t: "Steady month", x: "Nothing dramatic happened. Consistency is what builds real businesses." });
+  return out.slice(0, 3);
+}
+
+/* ----- player actions on the balance sheet ----- */
+function upgradeCost(s) { return Math.round(s.ind.equipCost * (0.6 + 0.4 * (s.equipLevel + 1))); }
+function buyUpgrade(s) {
+  const c = upgradeCost(s);
+  if (s.cash < c) return false;
+  s.cash -= c; s.equipGross += c; s.equipLevel++;
+  return true;
+}
+
+</script>
+<script>
+"use strict";
+/* ---------- UI: setup, live day-by-day running, skip, and the business dashboard ---------- */
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let selectedInd = null, selectedTier = "standard";
+let runSpeed = 0, prevSpeed = 0, acc = 0, timer = null, modalOpen = false, statementMode = "mtd";
+const SPEEDS = { pause: 0, slow: 2, fast: 6, turbo: 15 };
+
+function showScreen(id) { $("setup").classList.toggle("hidden", id !== "setup"); $("game").classList.toggle("hidden", id !== "game"); }
+function toast(text) {
+  const t = $("toast"); t.textContent = text; t.classList.remove("hidden");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add("hidden"), 3800);
+}
+
+/* ----- setup ----- */
+function renderSetup() {
+  const grid = $("indGrid"); grid.innerHTML = "";
+  for (const ind of INDUSTRIES) {
+    const b = document.createElement("button");
+    b.className = "ind"; b.setAttribute("aria-pressed", String(selectedInd === ind.id));
+    b.innerHTML = '<span class="name">' + ind.icon + " " + esc(ind.name) + '</span><p>' + esc(ind.blurb) + '</p><span class="meta">Start cash ' + fmt(ind.startCash) + " · Rent from " + fmt(ind.rent) + "/mo</span>";
+    b.onclick = () => { selectedInd = ind.id; renderSetup(); };
+    grid.appendChild(b);
+  }
+  const ind = INDUSTRIES.find(i => i.id === selectedInd);
+  const tiers = $("tierGrid"); tiers.innerHTML = "";
+  if (ind) {
+    for (const t of TIERS) {
+      const rent = ind.rent * t.rentMult, dep = rent * t.depMonths;
+      const b = document.createElement("button");
+      b.className = "ind"; b.setAttribute("aria-pressed", String(selectedTier === t.id));
+      b.innerHTML = '<span class="name">' + esc(ind.prem[TIERS.indexOf(t)]) + '</span><p>' + t.label + ' premises</p><span class="meta">Rent ' + fmt(rent) + "/mo · Deposit " + fmt(dep) + " · Capacity " + Math.round(t.capMult * 100) + "% · Customers " + Math.round(t.footMult * 100) + "%</span>";
+      b.onclick = () => { selectedTier = t.id; renderSetup(); };
+      tiers.appendChild(b);
+    }
+  }
+  $("startBtn").disabled = !ind;
+  $("risk").textContent = ind ? "Biggest risk: " + ind.risk : "Pick an industry to see its biggest risk.";
+}
+function startGame() {
+  const ind = INDUSTRIES.find(i => i.id === selectedInd);
+  if (!ind) return;
+  S = newGame(ind, selectedTier);
+  S.offers = [makeOffer(S), makeOffer(S)];
+  runSpeed = 0; prevSpeed = 0; acc = 0; statementMode = "mtd";
+  showScreen("game");
+  renderAll();
+  setSpeed(0);
+  toast("Your " + ind.name.toLowerCase() + " is open. Press play to run the business day by day.");
+}
+
+/* ----- running ----- */
+function setSpeed(v) {
+  runSpeed = v;
+  document.querySelectorAll("[data-speed]").forEach(b => b.setAttribute("aria-pressed", String(Number(b.dataset.speed) === v)));
+  if (v > 0 && !timer) timer = setInterval(tick, 100);
+  if (v === 0 && timer) { clearInterval(timer); timer = null; }
+}
+function tick() {
+  if (!S || S.over || modalOpen || runSpeed === 0) return;
+  acc += runSpeed * 0.1;
+  let monthEnded = false, eventsHit = false;
+  while (acc >= 1 && !S.over) {
+    acc -= 1;
+    const before = S.months.length;
+    const rec = stepDay(S);
+    if (rec.events.length) eventsHit = true;
+    if (S.months.length > before) { monthEnded = true; break; }
+    if (eventsHit) break;
+  }
+  renderLive();
+  if (S.over) { endGame(); return; }
+  if (monthEnded) showMonthModal();
+  else if (eventsHit) showEventModal();
+}
+function skipMonth() {
+  if (!S || S.over) return;
+  setSpeed(0); acc = 0;
+  skipToMonthEnd(S);
+  renderAll();
+  if (S.over) endGame(); else showMonthModal();
+}
+function takePending() { const p = S.pending.slice(); S.pending = []; return p; }
+
+/* ----- modals ----- */
+function openModal(build) {
+  modalOpen = true; prevSpeed = runSpeed; setSpeed(0);
+  const box = $("modalBody"); box.innerHTML = ""; build(box);
+  $("modal").classList.remove("hidden");
+}
+function closeModal() {
+  $("modal").classList.add("hidden"); modalOpen = false;
+  if (S && !S.over && prevSpeed > 0) setSpeed(prevSpeed);
+}
+function lessonBox(title, text) {
+  const d = document.createElement("div"); d.className = "lesson";
+  d.innerHTML = "<b>" + esc(title) + "</b><div>" + esc(text) + "</div>"; return d;
+}
+function showEventModal() {
+  const evs = takePending();
+  openModal(box => {
+    const h = document.createElement("h2"); h.textContent = "Something happened"; box.appendChild(h);
+    for (const e of evs) { const p = document.createElement("p"); p.innerHTML = "<strong>" + esc(e.title) + ".</strong> " + esc(e.text); box.appendChild(p); box.appendChild(lessonBox("Lesson", e.lesson)); }
+    box.appendChild(continueButton());
+  });
+}
+function showMonthModal() {
+  const L = S.closed; const evs = takePending();
+  openModal(box => {
+    const h = document.createElement("h2"); h.textContent = L.label + " closed"; box.appendChild(h);
+    const p = document.createElement("p"); p.className = "small";
+    p.textContent = "Net income " + fmt(L.net) + " · Revenue " + fmt(L.rev) + " · " + Math.round(L.buyers).toLocaleString("en-US") + " sales from " + Math.round(L.visitors).toLocaleString("en-US") + " " + S.ind.visitor.toLowerCase() + " · Cash now " + fmt(S.cash);
+    box.appendChild(p);
+    for (const e of evs) { box.appendChild(lessonBox("Event · " + e.title, e.text + " " + e.lesson)); }
+    for (const l of L.lessons) box.appendChild(lessonBox("Lesson · " + l.t, l.x));
+    box.appendChild(continueButton());
+  });
+}
+function continueButton() {
+  const b = document.createElement("button"); b.textContent = "Continue"; b.onclick = closeModal; return b;
+}
+function endGame() {
+  setSpeed(0); modalOpen = true;
+  const nw = netWorthNow(S), start = S.ind.startCash - S.ind.equipCost;
+  const grade = S.outcome === "bankrupt" ? "Bankrupt" : nw > start * 3 ? "Thriving" : nw > start ? "Profitable business" : nw > 0 ? "Surviving" : "Struggling";
+  openModal(box => {
+    const h = document.createElement("h2"); h.textContent = S.outcome === "bankrupt" ? "Business closed" : "Five years complete"; box.appendChild(h);
+    const p = document.createElement("p");
+    p.textContent = S.outcome === "bankrupt"
+      ? "Three month-ends overdrawn and the bank closed the account. Profit on paper does not pay the bills. Cash flow keeps a business alive."
+      : "You finished 5 years with net worth of " + fmt(nw) + ". Grade: " + grade + ".";
+    box.appendChild(p);
+    box.appendChild(lessonBox("What real owners learn", "Keep at least three months of operating costs in reserve. Price for margin, not just volume. Hire against confirmed demand. Read the cash balance as carefully as the income statement."));
+    const b = document.createElement("button"); b.textContent = "Start a new business";
+    b.onclick = () => { S = null; selectedInd = null; modalOpen = false; $("modal").classList.add("hidden"); showScreen("setup"); renderSetup(); };
+    box.appendChild(b);
+  });
+}
+
+/* ----- rendering ----- */
+function renderAll() { renderHeader(); renderOps(); renderPremises(); renderContracts(); renderBalance(); renderHistory(); renderLive(); renderNetWorth(); }
+function renderHeader() {
+  const ind = S.ind;
+  $("title").textContent = ind.icon + " " + ind.name;
+  $("dateLabel").textContent = dateLabel(S) + " · 5-year game";
+  $("hudCash").textContent = fmt(S.cash); $("hudCash").className = "num " + (S.cash < 0 ? "bad" : "");
+  $("hudNW").textContent = fmt(netWorthNow(S));
+  $("hudRep").textContent = Math.round(S.reputation * 100) + "%";
+  $("hudStaff").textContent = ind.roles.reduce((t, r) => t + S.staff[r.id], 0);
+  $("hudCap").textContent = Math.round(capacityMonthly(S)).toLocaleString("en-US") + "/mo";
+  $("hudPrem").textContent = ind.prem[TIERS.indexOf(S.tier)];
+}
+function renderLive() {
+  if (!S) return;
+  renderHeader();
+  const t = S.today, M = S.M, ind = S.ind;
+  $("visLabel").textContent = ind.visitor;
+  $("todayVis").textContent = t ? t.visitors : 0;
+  $("todayBuy").textContent = t ? t.buyers : 0;
+  $("todayWalk").textContent = t ? t.walkouts : 0;
+  $("todayConv").textContent = t && t.visitors ? pct(t.buyers / t.visitors) : "—";
+  $("todaySales").textContent = fmt(t ? t.sales + t.contract : 0);
+  $("todayCash").textContent = fmt(S.cash);
+  $("todayDate").textContent = t ? t.label : "Not started";
+  $("mtdVis").textContent = Math.round(M.visitors).toLocaleString("en-US");
+  $("mtdBuy").textContent = Math.round(M.buyers).toLocaleString("en-US");
+  $("todayNote").textContent = t && t.short ? "Under-staffed today: contracts are not being fully covered." : "";
+  renderChartDays(); renderFeed(); renderStatement();
+}
+function renderChartDays() {
+  const svg = $("dayChart"), days = S.dayLog.slice(-30);
+  if (!days.length) { svg.innerHTML = ""; return; }
+  const W = 600, H = 150, pad = 8, n = 30, bw = (W - pad * 2) / n;
+  const max = Math.max(10, ...days.map(d => d.visitors));
+  let bars = "";
+  days.forEach((d, i) => {
+    const x = pad + (n - days.length + i) * bw;
+    const hv = (d.visitors / max) * (H - 24), hb = (d.buyers / max) * (H - 24);
+    bars += '<rect x="' + (x + 1) + '" y="' + (H - 16 - hv) + '" width="' + (bw * 0.45) + '" height="' + hv + '" fill="var(--line)"/>';
+    bars += '<rect x="' + (x + bw * 0.5) + '" y="' + (H - 16 - hb) + '" width="' + (bw * 0.45) + '" height="' + hb + '" fill="var(--brass)"/>';
+  });
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  svg.innerHTML = bars + '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + (H - 16) + '" y2="' + (H - 16) + '" stroke="var(--line)"/>'
+    + '<text x="' + pad + '" y="' + (H - 2) + '" fill="var(--muted)" font-size="11">30 days ago</text>'
+    + '<text x="' + (W - pad) + '" y="' + (H - 2) + '" fill="var(--muted)" font-size="11" text-anchor="end">Today</text>';
+}
+function renderFeed() {
+  const log = $("feed"); log.innerHTML = "";
+  const rows = S.dayLog.slice(-25).reverse();
+  if (!rows.length) { log.innerHTML = '<div class="muted small">Press play to start the first day.</div>'; return; }
+  for (const r of rows) {
+    const d = document.createElement("div");
+    d.innerHTML = '<span class="num small muted">' + esc(r.label) + '</span> <span>' + r.visitors + " " + esc(S.ind.visitor.toLowerCase()) + ", " + r.buyers + " sales" + (r.walkouts ? ", " + r.walkouts + " turned away" : "") + ".</span>"
+      + (r.events.length ? ' <span class="warn">' + esc(r.events.join(", ")) + "</span>" : "");
+    log.appendChild(d);
+  }
+}
+function renderStatement() {
+  const body = $("statement");
+  const L = statementMode === "last" ? S.closed : statementFrom(S, S.M);
+  if (!L) { body.innerHTML = '<p class="muted small">No month has closed yet. Your first month will appear here.</p>'; $("verdict").textContent = ""; return; }
+  const rows = [
+    ["Sales revenue", L.sales], ["Contract revenue", L.contract], ["Total revenue", L.rev, "total"],
+    ["Cost of goods sold", -L.cogs], ["Gross profit", L.gp, "total"],
+    ["Salaries & wages", -L.payroll, "", 1], ["Payroll taxes (9%)", -L.payTax, "", 1], ["Rent", -L.rent, "", 1],
+    ["Utilities", -L.util, "", 1], ["Insurance", -L.ins, "", 1], ["Marketing", -L.mkt, "", 1],
+    ["Penalties", -L.pen, "", 1], ["Events (net)", L.evInc - L.evExp, "", 1],
+    ["Operating profit before depreciation", L.ebitda, "total"], ["Depreciation", -L.dep, "", 1],
+    ["Operating profit", L.ebit, "total"], ["Interest", -L.int, "", 1],
+    ["Profit before tax", L.ebt, "total"], ["Tax (25%)", -L.tax, "", 1], ["Net income", L.net, "total"]
+  ];
+  body.innerHTML = rows.map(r => '<div class="row ' + (r[2] || "") + '"><span class="' + (r[3] ? "indent" : "") + '">' + esc(r[0]) + '</span><span class="amt ' + (r[1] < 0 ? "bad" : "") + '">' + fmt(r[1]) + "</span></div>").join("");
+  const net = statementMode === "last" ? L.net : L.ebt;
+  $("verdict").textContent = (statementMode === "last" ? L.label : "Month to date") + ": " + (net >= 0 ? "profitable" : "loss-making") + (L.rev ? " · net margin " + pct((statementMode === "last" ? L.net : L.ebt) / L.rev) : "");
+  $("verdict").className = "small " + (net >= 0 ? "good" : "bad");
+  $("stmtMtd").setAttribute("aria-pressed", String(statementMode === "mtd"));
+  $("stmtLast").setAttribute("aria-pressed", String(statementMode === "last"));
+}
+function renderOps() {
+  const ind = S.ind;
+  $("priceTier").value = String(S.priceTier);
+  $("priceNote").textContent = "Current price $" + priceFor(S).toFixed(2) + " per " + (ind.price > 5000 ? "job" : "sale") + ". Discounts sell more; premium sells less at a higher margin.";
+  $("mkt").value = String(S.marketing);
+  $("mktNote").textContent = "Marketing " + fmt(S.marketing) + " a month, spread across the days. Returns shrink as spend grows.";
+  const list = $("staffList"); list.innerHTML = "";
+  for (const r of ind.roles) {
+    const row = document.createElement("div"); row.className = "staff-row";
+    row.innerHTML = '<div><div class="name">' + esc(r.name) + '</div><small>' + fmt(r.salary) + "/mo each · capacity " + Math.round(r.cap * 100) + '%</small></div><div class="stepper"><button class="ghost" aria-label="Let one go">−</button><span>' + S.staff[r.id] + '</span><button class="ghost" aria-label="Hire one">+</button></div>';
+    const b = row.querySelectorAll("button");
+    b[0].onclick = () => { if (S.staff[r.id] > 0) { S.staff[r.id]--; renderAll(); } };
+    b[1].onclick = () => { S.staff[r.id]++; renderAll(); };
+    list.appendChild(row);
+  }
+  $("upgradeNote").textContent = "Level " + S.equipLevel + ". Each level adds about " + Math.round(ind.equipCapBoost * 100) + "% capacity and adds to depreciation.";
+  $("upgradeBtn").textContent = "Buy upgrade (" + fmt(upgradeCost(S)) + ")";
+  $("upgradeBtn").disabled = S.cash < upgradeCost(S);
+}
+function renderPremises() {
+  const ind = S.ind, cur = S.tier;
+  $("premNow").textContent = ind.prem[TIERS.indexOf(cur)] + " · " + cur.label + " · rent " + fmt(rentOf(S)) + "/mo · deposit held " + fmt(S.deposit);
+  const box = $("premOptions"); box.innerHTML = "";
+  for (const t of TIERS) {
+    const rent = ind.rent * t.rentMult, dep = rent * t.depMonths;
+    const isCur = t.id === cur.id;
+    const cost = t.moveCost + dep - S.deposit;
+    const d = document.createElement("div"); d.className = "row";
+    d.innerHTML = '<span><strong>' + esc(ind.prem[TIERS.indexOf(t)]) + '</strong><br><small class="muted">' + fmt(rent) + "/mo · " + Math.round(t.capMult * 100) + "% capacity · " + Math.round(t.footMult * 100) + '% customers</small></span>';
+    const b = document.createElement("button");
+    b.className = isCur ? "ghost" : "ghost"; b.disabled = isCur || S.cash < cost + 1000;
+    b.textContent = isCur ? "Current" : "Move (" + fmt(cost) + ")";
+    b.onclick = () => { const r = movePremises(S, t.id); if (r === "ok") { toast("Moved to " + ind.prem[TIERS.indexOf(t)] + "."); renderAll(); } else if (r === "cash") toast("Not enough cash to move, including the new deposit and moving costs."); };
+    d.appendChild(b); box.appendChild(d);
+  }
+  $("premNote").textContent = "Moving costs a fee and a new deposit. Your old deposit comes back. A bigger site sells more but costs more every month.";
+}
+function renderContracts() {
+  const box = $("offers"); box.innerHTML = "";
+  if (!S.offers.length) box.innerHTML = '<p class="muted small">No offers right now. New ones arrive during the month.</p>';
+  S.offers.forEach((o, i) => {
+    const d = document.createElement("div"); d.className = "contract";
+    d.innerHTML = '<div class="head"><h3>' + esc(o.name) + '</h3><span class="tag brass">' + esc(o.client) + '</span></div><p>' + esc(o.desc) + '</p>'
+      + '<div class="row"><span>Monthly payment</span><span class="amt">' + fmt(o.monthly) + '</span></div>'
+      + '<div class="row"><span>Term</span><span class="amt">' + o.months + (o.months === 1 ? " month" : " months") + '</span></div>'
+      + '<div class="row"><span>Deposit paid to you now</span><span class="amt">' + fmt(o.deposit) + '</span></div>'
+      + '<div class="row"><span>Staff units needed</span><span class="amt">' + o.staffNeeded + '</span></div>'
+      + '<div class="row"><span>Penalty if you miss delivery</span><span class="amt bad">' + fmt(o.penalty) + '</span></div>'
+      + '<div class="btns"><button class="brass" data-a="acc">Accept</button><button class="ghost" data-a="dec">Decline</button></div>';
+    d.querySelector('[data-a="acc"]').onclick = () => {
+      const r = acceptOffer(S, i);
+      if (r === "limit") toast("You can hold up to " + MAX_CONTRACTS + " contracts at once.");
+      else { toast("Contract with " + o.client + " signed. Deposit " + fmt(o.deposit) + " received."); renderAll(); }
+    };
+    d.querySelector('[data-a="dec"]').onclick = () => { declineOffer(S, i); renderContracts(); };
+    box.appendChild(d);
+  });
+  const act = $("active"); act.innerHTML = "";
+  $("contractCount").textContent = S.contracts.length + " of " + MAX_CONTRACTS + " active";
+  if (!S.contracts.length) act.innerHTML = '<p class="muted small">No active contracts.</p>';
+  for (const c of S.contracts) {
+    const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = '<span>' + esc(c.client) + ' · ' + esc(c.name) + ' <small class="muted">(' + c.monthsLeft + ' mo left)</small></span><span class="amt">' + fmt(c.monthly) + "/mo</span>";
+    act.appendChild(r);
+  }
+  const need = S.contracts.reduce((t, c) => t + c.staffNeeded, 0);
+  $("contractNote").textContent = need
+    ? "Contracts need " + need + " staff units; you have " + Math.round(staffUnits(S) * 10) / 10 + ". Under-staffed on " + S.M.shortDays + " days this month; eight or more triggers penalties."
+    : "Accepting work you can staff keeps the reputation rising.";
+}
+function renderBalance() {
+  const bs = $("balance"); bs.innerHTML = "";
+  const items = [["Cash", S.cash], ["Equipment (net)", S.equipGross - S.equipAccDep], ["Rent deposit", S.deposit],
+    ["Total assets", S.cash + S.equipGross - S.equipAccDep + S.deposit], ["Loans", -S.loan], ["Net worth", netWorthNow(S)]];
+  items.forEach(([k, v], i) => {
+    const r = document.createElement("div"); r.className = "row" + (i === 3 || i === 5 ? " total" : "");
+    r.innerHTML = "<span></span><span class=\"amt\"></span>"; r.firstChild.textContent = k; r.lastChild.textContent = fmt(v); bs.appendChild(r);
+  });
+  $("loanInfo").textContent = "Loan balance " + fmt(S.loan) + " at 9% a year. Overdrawn cash is charged 22% a year.";
+  $("borrowBtn").disabled = S.loan >= 300000; $("repayBtn").disabled = S.loan <= 0 || S.cash < 26000;
+}
+function renderHistory() {
+  const box = $("history");
+  if (!S.months.length) { box.innerHTML = '<p class="muted small">Closed months will be listed here.</p>'; return; }
+  const rows = S.months.slice(-12).reverse().map(m => '<tr><td>' + esc(m.label) + '</td><td class="num">' + fmt(m.rev) + '</td><td class="num">' + fmt(m.net) + '</td><td class="num">' + Math.round(m.buyers).toLocaleString("en-US") + "</td></tr>").join("");
+  box.innerHTML = '<div class="statement-wrap"><table class="hist"><thead><tr><th>Month</th><th>Revenue</th><th>Net income</th><th>Sales</th></tr></thead><tbody>' + rows + "</tbody></table></div>";
+}
+function renderNetWorth() {
+  const svg = $("chart"), data = S.netWorthHistory.concat([netWorthNow(S)]);
+  if (data.length < 2) { svg.innerHTML = ""; $("chartNote").textContent = "Appears after the first month closes."; return; }
+  $("chartNote").textContent = "Net worth at each month end.";
+  const W = 600, H = 150, pad = 10;
+  const min = Math.min(0, ...data), max = Math.max(1, ...data);
+  const x = i => pad + (i / (data.length - 1)) * (W - pad * 2), y = v => H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
+  const pts = data.map((v, i) => x(i) + "," + y(v)).join(" ");
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  svg.innerHTML = '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--line)" stroke-dasharray="4 4"/>'
+    + '<polyline points="' + pts + '" fill="none" stroke="var(--brass)" stroke-width="2.5" stroke-linejoin="round"/>'
+    + '<circle cx="' + x(data.length - 1) + '" cy="' + y(data[data.length - 1]) + '" r="4" fill="var(--brass)"/>';
+}
+
+/* ----- wiring ----- */
+$("startBtn").onclick = startGame;
+document.querySelectorAll("[data-speed]").forEach(b => b.onclick = () => setSpeed(SPEEDS[b.dataset.speed] ?? Number(b.dataset.speed)));
+$("skipBtn").onclick = skipMonth;
+$("priceTier").onchange = e => { S.priceTier = Number(e.target.value); renderAll(); };
+$("mkt").onchange = e => { S.marketing = Number(e.target.value); renderAll(); };
+$("upgradeBtn").onclick = () => { if (buyUpgrade(S)) { toast("Equipment upgraded."); renderAll(); } };
+$("borrowBtn").onclick = () => { S.loan += 25000; S.cash += 25000; toast("Borrowed $25,000 at 9% a year."); renderAll(); };
+$("repayBtn").onclick = () => { const amt = Math.min(S.loan, 25000); S.loan -= amt; S.cash -= amt; renderAll(); };
+$("stmtMtd").onclick = () => { statementMode = "mtd"; renderStatement(); };
+$("stmtLast").onclick = () => { statementMode = "last"; renderStatement(); };
+$("restartBtn").onclick = () => { setSpeed(0); S = null; selectedInd = null; showScreen("setup"); renderSetup(); };
+renderSetup(); showScreen("setup");
+</script>
+
+</body>
+</html>

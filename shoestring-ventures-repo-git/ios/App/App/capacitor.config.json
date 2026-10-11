@@ -1,0 +1,10 @@
+{
+	"appId": "com.example.shoestringventures",
+	"appName": "Shoestring Ventures",
+	"webDir": "www",
+	"server": {
+		"androidScheme": "https"
+	},
+	"backgroundColor": "#f5f1e8",
+	"packageClassList": []
+}
